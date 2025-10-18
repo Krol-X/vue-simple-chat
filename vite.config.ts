@@ -10,7 +10,7 @@ export default defineConfig({
     lib: {
       entry: 'src/widget.ts',
       name: 'MessengerWidget',
-      fileName: 'widget',
+      fileName: 'widget'
     },
     rollupOptions: {
       external: ['vue'],

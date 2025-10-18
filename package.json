@@ -3,13 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/widget.umd.js",
+  "main": "./dist/widget.umd.cjs",
   "module": "./dist/widget.es.js",
   "exports": {
     ".": {
-      "import": "./dist/widget.es.js",
-      "require": "./dist/widget.umd.js"
-    }
+      "import": "./dist/widget.js",
+      "require": "./dist/widget.umd.cjs"
+    },
+    "./style.css": "./dist/widget.css"
   },
   "types": "./dist/types/index.d.ts",
   "scripts": {
