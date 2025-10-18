@@ -1,61 +1,43 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useMessenger } from './composables/useMessenger'
+import { useMessengerComposable } from './composables/useMessengerComposable'
 import SideMenu from './components/SideMenu.vue'
 import DialogsScreen from './components/DialogsScreen.vue'
 import ChatScreen from './components/ChatScreen.vue'
 import EmojiMenu from './components/EmojiMenu.vue'
 import ContextMenu from './components/ContextMenu.vue'
 
-// Используем composable для управления состоянием
+// Используем новый composable с Pinia stores
 const {
-  // Состояние
-  isOpen,
-  isMenuOpen,
-  isContextMenuOpen,
-  isEmojiMenuOpen,
-  currentTab,
-  activeDialogId,
-  currentTheme,
-  inputText,
+  // Stores
+  messengerStore,
+  uiStore,
+  themeStore,
   
-  // Вычисляемые свойства
+  // Computed
   filteredDialogs,
   currentMessages,
   currentDialog,
   
-  // Методы
-  togglePanel,
-  closePanel,
-  toggleMenu,
-  closeMenu,
-  toggleContextMenu,
-  closeContextMenu,
-  toggleEmojiMenu,
-  closeEmojiMenu,
-  setTab,
+  // Methods
   openDialog,
-  addDialog,
-  addMessage,
   sendMessage,
+  addMessage,
   insertEmoji,
   handleKeydown,
-  handleContextAction
-} = useMessenger()
-
-// Получаем методы для тем
-const { applyTheme, toggleTheme: toggleThemeFromComposable } = useMessenger()
+  handleContextAction,
+  initializeTheme
+} = useMessengerComposable()
 
 // Инициализация
 onMounted(() => {
-  // Восстанавливаем тему
-  const savedTheme = localStorage.getItem('messenger_theme') || 'light'
-  applyTheme(savedTheme)
+  // Инициализируем тему
+  initializeTheme()
 
   // Добавляем обработчик ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closePanel()
+      uiStore.closePanel()
     }
   })
 
@@ -66,34 +48,34 @@ onMounted(() => {
         !target.closest('[data-open-content-menu]') &&
         !target.closest('.emoji-menu') && 
         !target.closest('[data-open-emoji]')) {
-      closeContextMenu()
-      closeEmojiMenu()
+      uiStore.closeContextMenu()
+      uiStore.closeEmojiMenu()
     }
   })
 })
 
 // Публичный API
 defineExpose({
-  open: () => { isOpen.value = true },
-  close: closePanel,
-  toggle: togglePanel,
-  addDialog,
-  addMessage,
+  open: () => { uiStore.togglePanel() },
+  close: uiStore.closePanel,
+  toggle: uiStore.togglePanel,
+  addDialog: messengerStore.addDialog,
+  addMessage: messengerStore.addMessage,
   openDialog,
-  setTab,
-  setTheme: applyTheme,
-  toggleTheme: toggleThemeFromComposable,
-  getCurrentTheme: () => currentTheme.value
+  setTab: uiStore.setTab,
+  setTheme: themeStore.applyTheme,
+  toggleTheme: themeStore.toggleTheme,
+  getCurrentTheme: () => themeStore.currentTheme
 })
 </script>
 
 <template>
-  <div class="chat-panel" :class="{ 'is-open': isOpen, 'panel-inited': true }">
+  <div class="chat-panel" :class="{ 'is-open': uiStore.isOpen, 'panel-inited': true }">
     <!-- Кнопка переключения -->
     <button 
       class="chat-toggle" 
-      @click="togglePanel"
-      :aria-expanded="isOpen"
+      @click="uiStore.togglePanel"
+      :aria-expanded="uiStore.isOpen"
       title="Открыть чат"
     >
       <i class="far fa-comments"></i>
@@ -104,61 +86,61 @@ defineExpose({
       <!-- Backdrop для бокового меню -->
       <div 
         class="backdrop" 
-        :class="{ 'is-visible': isMenuOpen }"
-        @click="closeMenu"
+        :class="{ 'is-visible': uiStore.isMenuOpen }"
+        @click="uiStore.closeMenu"
       ></div>
 
       <!-- Боковое меню -->
       <SideMenu
-        :is-open="isMenuOpen"
-        :current-tab="currentTab"
-        :current-theme="currentTheme"
-        @close-panel="closePanel"
-        @set-tab="setTab"
-        @toggle-theme="toggleTheme"
+        :is-open="uiStore.isMenuOpen"
+        :current-tab="uiStore.currentTab"
+        :current-theme="themeStore.currentTheme"
+        @close-panel="uiStore.closePanel"
+        @set-tab="uiStore.setTab"
+        @toggle-theme="themeStore.toggleTheme"
       />
 
       <!-- Экран диалогов -->
       <DialogsScreen
-        :is-active="!activeDialogId"
-        :current-tab="currentTab"
+        :is-active="!uiStore.activeDialogId"
+        :current-tab="uiStore.currentTab"
         :dialogs="filteredDialogs"
-        @open-menu="toggleMenu"
+        @open-menu="uiStore.toggleMenu"
         @open-dialog="openDialog"
       />
 
       <!-- Экран чата -->
       <ChatScreen
-        :is-active="!!activeDialogId"
+        :is-active="!!uiStore.activeDialogId"
         :messages="currentMessages"
-        :input-text="inputText"
+        :input-text="uiStore.inputText"
         :dialog-title="currentDialog?.title"
-        @back="activeDialogId = null"
-        @open-context-menu="toggleContextMenu"
-        @update:input-text="inputText = $event"
+        @back="uiStore.setActiveDialog(null)"
+        @open-context-menu="uiStore.toggleContextMenu"
+        @update:input-text="uiStore.setInputText"
         @send-message="sendMessage"
-        @open-emoji="toggleEmojiMenu"
+        @open-emoji="uiStore.toggleEmojiMenu"
         @keydown="handleKeydown"
       />
     </div>
 
     <!-- Контекстное меню -->
     <ContextMenu
-      :is-open="isContextMenuOpen"
+      :is-open="uiStore.isContextMenuOpen"
       @context-action="handleContextAction"
     />
 
     <!-- Меню эмодзи -->
     <EmojiMenu
-      :is-open="isEmojiMenuOpen"
+      :is-open="uiStore.isEmojiMenuOpen"
       @insert-emoji="insertEmoji"
     />
 
     <!-- Backdrop для контекстного меню и эмодзи -->
     <div 
       class="context-menu-backdrop" 
-      :class="{ 'is-visible': isContextMenuOpen || isEmojiMenuOpen }"
-      @click="closeContextMenu(); closeEmojiMenu()"
+      :class="{ 'is-visible': uiStore.isContextMenuOpen || uiStore.isEmojiMenuOpen }"
+      @click="uiStore.closeContextMenu(); uiStore.closeEmojiMenu()"
     ></div>
   </div>
 </template>
