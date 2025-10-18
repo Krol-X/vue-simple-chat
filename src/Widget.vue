@@ -31,8 +31,8 @@ const {
 
 // Инициализация
 onMounted(() => {
-  // Инициализируем тему
-  initializeTheme()
+  // Инициализируем тему сразу
+  themeStore.restoreTheme()
 
   // Добавляем обработчик ESC
   document.addEventListener('keydown', (e) => {

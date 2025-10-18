@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import { useMessengerStore } from '../stores/messenger'
 import { useUIStore } from '../stores/ui'
 import { useThemeStore } from '../stores/theme'
-import type { Dialog, Message } from '../types'
+import type { Message } from '../types'
 
 // Composable для работы с мессенджером через Pinia stores
 export function useMessengerComposable() {
@@ -105,7 +105,13 @@ export function useMessengerComposable() {
 
   // Initialize theme on mount
   const initializeTheme = () => {
-    themeStore.restoreTheme()
+    // Принудительно применяем светлую тему, если в localStorage ничего нет
+    const savedTheme = localStorage.getItem('messenger_theme')
+    if (!savedTheme) {
+      themeStore.applyTheme('light')
+    } else {
+      themeStore.restoreTheme()
+    }
   }
 
   return {

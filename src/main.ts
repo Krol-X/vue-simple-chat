@@ -9,6 +9,11 @@ const pinia = createPinia()
 
 app.use(pinia)
 
+// Инициализируем тему сразу после создания Pinia
+import { useThemeStore } from './stores/theme'
+const themeStore = useThemeStore()
+themeStore.restoreTheme()
+
 // Монтируем приложение в элемент с id="widget"
 const widgetElement = document.getElementById('widget')
 if (widgetElement) {

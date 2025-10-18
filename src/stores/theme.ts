@@ -29,7 +29,7 @@ export const useThemeStore = defineStore('theme', () => {
   const allThemes = computed(() => ({
     ...defaultThemes,
     ...customThemes.value
-  }))
+  } as Record<string, Theme>))
 
   const currentThemeConfig = computed(() => 
     allThemes.value[currentTheme.value]
@@ -88,7 +88,9 @@ export const useThemeStore = defineStore('theme', () => {
       applyTheme(savedTheme)
       return savedTheme
     }
-    return currentTheme.value
+    // Если в localStorage нет темы, применяем светлую по умолчанию
+    applyTheme('light')
+    return 'light'
   }
 
   const resetToDefault = () => {
