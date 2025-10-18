@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Простой пример виджета</title>
+  <link rel="stylesheet" href="./dist/widget.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+</head>
+
+<body>
+  <div id="widget"></div>
+
+  <script src="https://unpkg.com/vue@3.5/dist/vue.runtime.global.prod.js"></script>
+  <script src="./dist/widget.umd.cjs"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const widget = await MessengerWidget.init('#widget', {
+        seedDialogs: [
+          {id: 1, title: 'Андрей'},
+          {id: 2, title: 'Мария', type: 'chat'},
+          {id: 3, title: 'Новости', type: 'channel'}
+        ],
+        seedMessages: [
+          {
+            dialogId: 1,
+            from: 'other',
+            author: 'Андрей',
+            text: 'Привет! Как дела?',
+            createdAt: new Date()
+          },
+          {
+            dialogId: 1,
+            from: 'me',
+            text: 'Привет! Всё хорошо, спасибо!',
+            createdAt: new Date()
+          }
+        ]
+      });
+      
+      // Добавляем еще один диалог через API
+      widget.addDialog({id: 10, title: 'Техподдержка', type: 'channel'});
+      
+      // Делаем виджет доступным в консоли для тестирования
+      window.widget = widget;
+      
+      console.log('MessengerWidget initialized:', widget);
+    });
+  </script>
+</body>
+
+</html>

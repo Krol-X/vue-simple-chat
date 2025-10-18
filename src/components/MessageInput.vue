@@ -10,7 +10,7 @@ interface Emits {
   (e: 'keydown', event: KeyboardEvent): void
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const handleInput = (event: Event) => {

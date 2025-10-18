@@ -59,9 +59,8 @@ export const useMessengerStore = defineStore('messenger', () => {
     updateDialogPreview(dialogId, newMessage.text, newMessage.createdAt)
   }
 
-  const openDialog: MessengerActions['openDialog'] = (dialogId) => {
-    // Логика открытия диалога может быть расширена
-    console.log('Opening dialog:', dialogId)
+  const openDialog: MessengerActions['openDialog'] = () => {
+    //
   }
 
   const sendMessage: MessengerActions['sendMessage'] = (text) => {

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Расширенный тест виджета</title>
+  <link rel="stylesheet" href="./dist/widget.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    .test-controls {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-controls h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .test-controls button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .test-controls button:hover {
+      background: #f5f5f5;
+    }
+    .test-controls button:active {
+      background: #e0e0e0;
+    }
+    .test-controls .group {
+      margin: 15px 0;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+    .test-controls .group h3 {
+      margin: 0 0 10px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e8f5e8;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      color: #2e7d32;
+    }
+    .error {
+      background: #ffebee;
+      border-color: #f44336;
+      color: #c62828;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="test-controls">
+    <h2>🚀 Расширенный тест Vue Messenger Widget</h2>
+    
+    <div class="group">
+      <h3>Управление панелью</h3>
+      <button onclick="testOpen()">Открыть виджет</button>
+      <button onclick="testClose()">Закрыть виджет</button>
+      <button onclick="testToggle()">Переключить виджет</button>
+    </div>
+
+    <div class="group">
+      <h3>Управление диалогами</h3>
+      <button onclick="testAddDialog()">Добавить диалог</button>
+      <button onclick="testAddChannel()">Добавить канал</button>
+      <button onclick="testOpenDialog()">Открыть первый диалог</button>
+    </div>
+
+    <div class="group">
+      <h3>Управление сообщениями</h3>
+      <button onclick="testAddMessage()">Добавить сообщение</button>
+      <button onclick="testAddMyMessage()">Добавить свое сообщение</button>
+      <button onclick="testAddMultipleMessages()">Добавить несколько сообщений</button>
+    </div>
+
+    <div class="group">
+      <h3>Управление интерфейсом</h3>
+      <button onclick="testShowDialogs()">Показать диалоги</button>
+      <button onclick="testShowChat()">Показать чат</button>
+      <button onclick="testSetTab('chats')">Вкладка "Чаты"</button>
+      <button onclick="testSetTab('channels')">Вкладка "Каналы"</button>
+    </div>
+
+    <div class="group">
+      <h3>Управление темами</h3>
+      <button onclick="testSetTheme('light')">Светлая тема</button>
+      <button onclick="testSetTheme('dark')">Темная тема</button>
+      <button onclick="testToggleTheme()">Переключить тему</button>
+      <button onclick="testGetCurrentTheme()">Текущая тема</button>
+    </div>
+
+    <div class="group">
+      <h3>Дополнительные функции</h3>
+      <button onclick="testDestroy()">Отключить виджет (оставить DOM)</button>
+      <button onclick="testRemove()">Полностью удалить виджет</button>
+      <button onclick="testReinit()">Переинициализировать</button>
+      <button onclick="testLogState()">Логировать состояние</button>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+  </div>
+
+  <div id="widget"></div>
+
+  <script src="https://unpkg.com/vue@3.5/dist/vue.runtime.global.prod.js"></script>
+  <script src="./dist/widget.umd.cjs"></script>
+
+  <script>
+    let widget = null;
+    let messageCounter = 1;
+
+    // Функция для показа статуса
+    function showStatus(message, isError = false) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = isError ? 'status error' : 'status';
+      status.style.display = 'block';
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 3000);
+    }
+
+    // Инициализация виджета
+    async function initWidget() {
+      try {
+        widget = await MessengerWidget.init('#widget', {
+          seedDialogs: [
+            {id: 1, title: 'Андрей Петров', type: 'chat'},
+            {id: 2, title: 'Мария Иванова', type: 'chat'},
+            {id: 3, title: 'Новости компании', type: 'channel'},
+            {id: 4, title: 'Техподдержка', type: 'channel'}
+          ],
+          seedMessages: [
+            {
+              dialogId: 1,
+              from: 'other',
+              author: 'Андрей Петров',
+              text: 'Привет! Как дела с проектом?',
+              createdAt: new Date(Date.now() - 3600000) // час назад
+            },
+            {
+              dialogId: 1,
+              from: 'me',
+              text: 'Привет! Всё идет хорошо, спасибо!',
+              createdAt: new Date(Date.now() - 1800000) // 30 минут назад
+            },
+            {
+              dialogId: 3,
+              from: 'other',
+              author: 'Новости компании',
+              text: 'Добро пожаловать в нашу команду! 🎉',
+              createdAt: new Date(Date.now() - 7200000) // 2 часа назад
+            }
+          ]
+        });
+        
+        console.log('✅ Widget initialized successfully:', widget);
+        showStatus('✅ Виджет успешно инициализирован!');
+        
+        // Делаем виджет доступным глобально для тестирования
+        window.testWidget = widget;
+        
+      } catch (error) {
+        console.error('❌ Failed to initialize widget:', error);
+        showStatus('❌ Ошибка инициализации виджета: ' + error.message, true);
+      }
+    }
+
+    // Управление панелью
+    function testOpen() {
+      if (widget) {
+        widget.open();
+        showStatus('🔓 Панель открыта');
+      }
+    }
+
+    function testClose() {
+      if (widget) {
+        widget.close();
+        showStatus('🔒 Панель закрыта');
+      }
+    }
+
+    function testToggle() {
+      if (widget) {
+        widget.toggle();
+        showStatus('🔄 Состояние панели переключено');
+      }
+    }
+
+    // Управление диалогами
+    function testAddDialog() {
+      if (widget) {
+        const id = Date.now();
+        const names = ['Алексей', 'Елена', 'Дмитрий', 'Анна', 'Сергей'];
+        const name = names[Math.floor(Math.random() * names.length)];
+        widget.addDialog({
+          id: id,
+          title: name + ' ' + id,
+          type: 'chat'
+        });
+        showStatus(`💬 Добавлен диалог: ${name} ${id}`);
+      }
+    }
+
+    function testAddChannel() {
+      if (widget) {
+        const id = Date.now();
+        const channels = ['Объявления', 'Обсуждения', 'Идеи', 'Вопросы', 'Поздравления'];
+        const channel = channels[Math.floor(Math.random() * channels.length)];
+        widget.addDialog({
+          id: id,
+          title: channel + ' ' + id,
+          type: 'channel'
+        });
+        showStatus(`📢 Добавлен канал: ${channel} ${id}`);
+      }
+    }
+
+    function testOpenDialog() {
+      if (widget) {
+        // Открываем первый диалог
+        widget.openDialog(1);
+        showStatus('👁️ Открыт диалог с ID: 1');
+      }
+    }
+
+    // Управление сообщениями
+    function testAddMessage() {
+      if (widget) {
+        const messages = [
+          'Привет! Как дела?',
+          'Что нового?',
+          'Как прошел день?',
+          'Есть ли новости?',
+          'Как дела с работой?'
+        ];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        widget.addMessage(1, {
+          from: 'other',
+          author: 'Андрей Петров',
+          text: message,
+          createdAt: new Date()
+        });
+        showStatus(`📝 Добавлено сообщение: "${message}"`);
+      }
+    }
+
+    function testAddMyMessage() {
+      if (widget) {
+        const messages = [
+          'Отлично, спасибо!',
+          'Всё хорошо!',
+          'Работаю над проектом',
+          'Планирую отпуск',
+          'Изучаю новые технологии'
+        ];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        widget.addMessage(1, {
+          from: 'me',
+          text: message,
+          createdAt: new Date()
+        });
+        showStatus(`📝 Добавлено ваше сообщение: "${message}"`);
+      }
+    }
+
+    function testAddMultipleMessages() {
+      if (widget) {
+        const messages = [
+          'Сообщение 1',
+          'Сообщение 2', 
+          'Сообщение 3'
+        ];
+        messages.forEach((msg, index) => {
+          setTimeout(() => {
+            widget.addMessage(1, {
+              from: 'other',
+              author: 'Система',
+              text: msg,
+              createdAt: new Date()
+            });
+          }, index * 500);
+        });
+        showStatus('📝 Добавлено 3 сообщения с задержкой');
+      }
+    }
+
+    // Управление интерфейсом
+    function testShowDialogs() {
+      if (widget) {
+        widget.showDialogs();
+        showStatus('📋 Показан список диалогов');
+      }
+    }
+
+    function testShowChat() {
+      if (widget) {
+        widget.showChat();
+        showStatus('💬 Показан чат');
+      }
+    }
+
+    function testSetTab(tab) {
+      if (widget) {
+        widget.setTab(tab);
+        showStatus(`📑 Переключено на вкладку: ${tab}`);
+      }
+    }
+
+    // Управление темами
+    function testSetTheme(theme) {
+      if (widget) {
+        widget.setTheme(theme);
+        showStatus(`🎨 Установлена тема: ${theme}`);
+      }
+    }
+
+    function testToggleTheme() {
+      if (widget) {
+        widget.toggleTheme();
+        const currentTheme = widget.getCurrentTheme();
+        showStatus(`🎨 Переключена тема на: ${currentTheme}`);
+      }
+    }
+
+    function testGetCurrentTheme() {
+      if (widget) {
+        const theme = widget.getCurrentTheme();
+        showStatus(`🎨 Текущая тема: ${theme}`);
+      }
+    }
+
+    // Дополнительные функции
+    function testDestroy() {
+      if (widget) {
+        widget.destroy();
+        widget = null;
+        showStatus('🗑️ Виджет отключен (DOM-элемент остался)');
+      }
+    }
+
+    function testRemove() {
+      if (widget) {
+        widget.remove();
+        widget = null;
+        showStatus('🗑️ Виджет полностью удален (включая DOM-элемент)');
+      }
+    }
+
+    function testReinit() {
+      if (widget) {
+        widget.destroy();
+        widget = null;
+      }
+      setTimeout(() => {
+        initWidget();
+      }, 500);
+    }
+
+    function testLogState() {
+      if (widget) {
+        const widgetElement = document.getElementById('widget');
+        console.log('📊 Состояние виджета:', {
+          currentTheme: widget.getCurrentTheme(),
+          isOpen: widget.root?.classList.contains('is-open'),
+          widgetElementExists: !!widgetElement,
+          widgetElementContent: widgetElement?.innerHTML.length || 0,
+          widgetElementChildren: widgetElement?.children.length || 0
+        });
+        showStatus('📊 Состояние виджета выведено в консоль');
+      } else {
+        const widgetElement = document.getElementById('widget');
+        console.log('📊 Виджет не инициализирован. DOM-элемент:', {
+          exists: !!widgetElement,
+          content: widgetElement?.innerHTML.length || 0,
+          children: widgetElement?.children.length || 0
+        });
+        showStatus('📊 Состояние DOM-элемента выведено в консоль');
+      }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', initWidget);
+  </script>
+</body>
+
+</html>

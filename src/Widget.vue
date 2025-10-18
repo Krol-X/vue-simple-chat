@@ -7,41 +7,29 @@ import ChatScreen from './components/ChatScreen.vue'
 import EmojiMenu from './components/EmojiMenu.vue'
 import ContextMenu from './components/ContextMenu.vue'
 
-// Используем новый composable с Pinia stores
 const {
-  // Stores
   messengerStore,
   uiStore,
   themeStore,
-  
-  // Computed
   filteredDialogs,
   currentMessages,
   currentDialog,
-  
-  // Methods
   openDialog,
   sendMessage,
-  addMessage,
   insertEmoji,
   handleKeydown,
-  handleContextAction,
-  initializeTheme
+  handleContextAction
 } = useMessengerComposable()
 
-// Инициализация
 onMounted(() => {
-  // Инициализируем тему сразу
   themeStore.restoreTheme()
 
-  // Добавляем обработчик ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       uiStore.closePanel()
     }
   })
 
-  // Добавляем обработчик клика вне меню
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
     if (!target.closest('.context-menu') && 
@@ -53,12 +41,12 @@ onMounted(() => {
     }
   })
 })
-
-// Публичный API
 defineExpose({
   open: () => { uiStore.togglePanel() },
   close: uiStore.closePanel,
   toggle: uiStore.togglePanel,
+  showDialogs: () => uiStore.setTab('chats'),
+  showChat: () => uiStore.setTab('channels'),
   addDialog: messengerStore.addDialog,
   addMessage: messengerStore.addMessage,
   openDialog,
@@ -71,7 +59,6 @@ defineExpose({
 
 <template>
   <div class="chat-panel" :class="{ 'is-open': uiStore.isOpen, 'panel-inited': true }">
-    <!-- Кнопка переключения -->
     <button 
       class="chat-toggle" 
       @click="uiStore.togglePanel"
@@ -81,16 +68,13 @@ defineExpose({
       <i class="far fa-comments"></i>
     </button>
 
-    <!-- Основной контент -->
     <div class="layout">
-      <!-- Backdrop для бокового меню -->
       <div 
         class="backdrop" 
         :class="{ 'is-visible': uiStore.isMenuOpen }"
         @click="uiStore.closeMenu"
       ></div>
 
-      <!-- Боковое меню -->
       <SideMenu
         :is-open="uiStore.isMenuOpen"
         :current-tab="uiStore.currentTab"
@@ -100,7 +84,6 @@ defineExpose({
         @toggle-theme="themeStore.toggleTheme"
       />
 
-      <!-- Экран диалогов -->
       <DialogsScreen
         :is-active="!uiStore.activeDialogId"
         :current-tab="uiStore.currentTab"
@@ -109,7 +92,6 @@ defineExpose({
         @open-dialog="openDialog"
       />
 
-      <!-- Экран чата -->
       <ChatScreen
         :is-active="!!uiStore.activeDialogId"
         :messages="currentMessages"
@@ -124,19 +106,16 @@ defineExpose({
       />
     </div>
 
-    <!-- Контекстное меню -->
     <ContextMenu
       :is-open="uiStore.isContextMenuOpen"
       @context-action="handleContextAction"
     />
 
-    <!-- Меню эмодзи -->
     <EmojiMenu
       :is-open="uiStore.isEmojiMenuOpen"
       @insert-emoji="insertEmoji"
     />
 
-    <!-- Backdrop для контекстного меню и эмодзи -->
     <div 
       class="context-menu-backdrop" 
       :class="{ 'is-visible': uiStore.isContextMenuOpen || uiStore.isEmojiMenuOpen }"
@@ -146,7 +125,6 @@ defineExpose({
 </template>
 
 <style scoped>
-/* ===== LAYOUT COMPONENTS ===== */
 .layout {
   position: relative;
   display: flex;
@@ -160,7 +138,6 @@ defineExpose({
   width: 100%;
 }
 
-/* ===== CHAT PANEL AND TOGGLE ===== */
 .chat-panel {
   position: fixed;
   top: 0;
@@ -228,14 +205,12 @@ defineExpose({
   display: block;
 }
 
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 480px) {
   .chat-panel {
     max-width: 100%;
   }
 }
 
-/* ===== INTERACTIVE STATES ===== */
 @media (hover: hover) {
   .chat-toggle:hover {
     background-color: var(--bg-accent);

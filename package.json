@@ -1,16 +1,27 @@
 {
-  "name": "messenger",
+  "name": "widget",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "./dist/widget.umd.js",
+  "module": "./dist/widget.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/widget.es.js",
+      "require": "./dist/widget.umd.js"
+    }
+  },
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
+  "peerDependencies": {
+    "vue": "^3.5"
+  },
   "dependencies": {
-    "pinia": "^3.0.3",
-    "vue": "^3.5.22"
+    "pinia": "^3.0.3"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

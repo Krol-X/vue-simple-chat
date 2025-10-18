@@ -4,13 +4,11 @@ import { useUIStore } from '../stores/ui'
 import { useThemeStore } from '../stores/theme'
 import type { Message } from '../types'
 
-// Composable для работы с мессенджером через Pinia stores
 export function useMessengerComposable() {
   const messengerStore = useMessengerStore()
   const uiStore = useUIStore()
   const themeStore = useThemeStore()
 
-  // Computed properties
   const filteredDialogs = computed(() => {
     const showType = uiStore.currentTab === 'channels' ? 'channel' : 'chat'
     return messengerStore.dialogs.filter(d => (d.type || 'chat') === showType)
@@ -25,8 +23,6 @@ export function useMessengerComposable() {
     if (!uiStore.activeDialogId) return null
     return messengerStore.getDialogById(uiStore.activeDialogId)
   })
-
-  // Methods
   const openDialog = (dialogId: number) => {
     uiStore.setActiveDialog(dialogId)
     messengerStore.openDialog(dialogId)
@@ -103,9 +99,7 @@ export function useMessengerComposable() {
     uiStore.closeContextMenu()
   }
 
-  // Initialize theme on mount
   const initializeTheme = () => {
-    // Принудительно применяем светлую тему, если в localStorage ничего нет
     const savedTheme = localStorage.getItem('messenger_theme')
     if (!savedTheme) {
       themeStore.applyTheme('light')
@@ -115,17 +109,12 @@ export function useMessengerComposable() {
   }
 
   return {
-    // Stores
     messengerStore,
     uiStore,
     themeStore,
-    
-    // Computed
     filteredDialogs,
     currentMessages,
     currentDialog,
-    
-    // Methods
     openDialog,
     sendMessage,
     addMessage,
