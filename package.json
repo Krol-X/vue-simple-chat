@@ -7,12 +7,15 @@
   "module": "./dist/widget.es.js",
   "exports": {
     ".": {
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/widget.js",
       "require": "./dist/widget.umd.cjs"
     },
     "./style.css": "./dist/widget.css"
   },
-  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],  
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
@@ -30,6 +33,7 @@
     "@vue/tsconfig": "^0.8.1",
     "typescript": "~5.9.3",
     "vite": "npm:rolldown-vite@7.1.14",
+    "vite-plugin-dts": "^4.5.4",
     "vue-tsc": "^3.1.0"
   },
   "overrides": {
