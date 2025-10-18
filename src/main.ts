@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import Widget from './Widget.vue'
+import './styles/global.css'
 
 // Создаем приложение Vue
 const app = createApp(Widget)
