@@ -71,8 +71,8 @@ const widget = await MessengerWidget.init('#widget', {
 
 ## Примеры
 
-- `test.html` - расширенный тест с кнопками
-- `simple-example.html` - простой пример
+- `example.html` - простой пример
+- `test.html` - тест api
 
 ## Разработка
 
